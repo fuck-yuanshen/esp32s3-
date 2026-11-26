@@ -1,0 +1,101 @@
+menu "STM32 offline programmer"
+
+    choice STM32_PROGRAMMER_BACKEND
+        prompt "Programming interface"
+        default STM32_PROGRAMMER_SWD
+        config STM32_PROGRAMMER_SWD
+            bool "SWD (STM32F103 single-bank)"
+        config STM32_PROGRAMMER_USART
+            bool "Factory USART bootloader (legacy)"
+    endchoice
+
+    config STM32_SWDIO_GPIO
+        int "SWDIO GPIO (target PA13)"
+        range 0 48
+        default 19
+
+    config STM32_SWCLK_GPIO
+        int "SWCLK GPIO (target PA14)"
+        range 0 48
+        default 20
+
+    config STM32_SWD_DELAY_US
+        int "SWD half-period delay (microseconds)"
+        range 1 20
+        default 1
+
+    config STM32_SWD_MANUAL_RESET
+        bool "Guide the operator through STM32 reset on the display"
+        depends on STM32_PROGRAMMER_SWD
+        default n
+        help
+            Keep enabled only when the target RESET button must be operated by
+            hand. Disable it for the one-click automatic SWD flow.
+
+    config STM32_SWD_WIRED_RESET
+        bool "Drive STM32 NRST from an ESP32 GPIO"
+        depends on STM32_PROGRAMMER_SWD
+        default n
+        help
+            Drive the configured NRST GPIO during automatic SWD programming.
+            Leave disabled when the target RESET pin is not connected. In that
+            case the programmer attaches to the running target and issues a
+            Cortex-M SYSRESETREQ after verification.
+
+    config STM32_BOOT0_GPIO
+        int "STM32 BOOT0 GPIO"
+        range 0 48
+        default 15
+
+    config STM32_NRST_GPIO
+        int "STM32 NRST GPIO"
+        range 0 48
+        default 16
+
+    config STM32_UART_BAUD
+        int "Bootloader baud rate"
+        default 57600
+        help
+            The STM32 system bootloader autodetects 9600..115200. 57600 is the
+            value verified by the reference project.
+
+    config STM32_BYTE_PACING_MS
+        int "Delay between transmitted bytes (ms)"
+        range 0 5
+        default 1
+        help
+            The STM32 bootloader is sensitive to back-to-back UART frames.
+            One millisecond per byte is the verified setting. Set 0 only after
+            confirming a faster rate works on the target.
+
+    config STM32_DEFAULT_BASE
+        hex "Default flash base address"
+        default 0x08000000
+
+    config STM32_DEFAULT_PAGE_SIZE
+        int "Default erase page size (bytes)"
+        default 2048
+        help
+            STM32L4/L0: 2048. STM32F1/F3: 1024 or 2048 depending on density.
+            STM32F4 sectors are larger; set the real value for that family.
+
+    config STM32_ERASE_CHUNK
+        int "Pages per erase command"
+        range 1 16
+        default 4
+
+    config STM32_MASS_ERASE_FALLBACK
+        bool "Fall back to a whole-chip erase when the page list is rejected"
+        default y
+        help
+            When the target refuses every page index (usually because the
+            selected page size does not match the part), the driver can issue
+            the AN3155 mass-erase command instead. That command erases the
+            entire flash, including the option bytes region on some parts, so
+            enable it only for parts you intend to fully reprogram.
+
+    config STM32_VERIFY_AFTER_WRITE
+        bool "Read back and compare every page"
+        default y
+
+endmenu

@@ -1,0 +1,33 @@
+menu "Shared UART link (payload and STM32 ISP)"
+
+    config UART_LINK_PORT
+        int "UART peripheral number"
+        range 2 2
+        default 2
+        help
+            UART2 and GPIO19/20 are shared by normal bidirectional communication
+            and the STM32 bootloader. Normal RX/TX is paused for the complete
+            ISP job and resumes after the job restores the normal baud rate.
+
+    config UART_LINK_TX_GPIO
+        int "UART TX GPIO (ESP32-S3 output)"
+        range 0 48
+        default 19
+
+    config UART_LINK_RX_GPIO
+        int "UART RX GPIO (ESP32-S3 input)"
+        range 0 48
+        default 20
+
+    config UART_LINK_BAUD
+        int "Baud rate"
+        default 115200
+
+    config UART_LINK_APPEND_CRLF
+        bool "Append CR LF after every payload"
+        default y
+        help
+            Most text-oriented slaves expect a line terminator. Disable it
+            for binary payloads that must be sent byte-exact.
+
+endmenu

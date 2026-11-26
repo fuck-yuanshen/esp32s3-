@@ -1,0 +1,6 @@
+## LVGL is resolved by the ESP-IDF component manager.
+## https://components.espressif.com/components/lvgl/lvgl
+## `dependencies.lock` pins the resolved version and content hash.
+dependencies:
+  idf: '>=6.1'
+  lvgl/lvgl: '9.5.0'

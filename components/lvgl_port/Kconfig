@@ -1,0 +1,40 @@
+menu "LVGL port"
+
+    config LVGL_PORT_BUFFER_LINES
+        int "Partial draw buffer height in lines"
+        range 8 160
+        default 40
+        help
+            One render buffer of lines x panel width x 2 bytes is allocated in
+            internal DMA-capable RAM, on top of the panel driver's own staging
+            buffer. 40 lines at 240 px costs 19200 bytes; a taller buffer means
+            fewer SPI transactions per frame, a shorter one saves RAM.
+
+    config LVGL_PORT_TASK_PRIORITY
+        int "LVGL handler task priority"
+        range 1 20
+        default 4
+
+    config LVGL_PORT_TASK_STACK
+        int "LVGL handler task stack size (bytes)"
+        range 3072 32768
+        default 8192
+
+    config LVGL_PORT_ARROW_NAV
+        bool "Arrow keys move focus inside the LVGL group"
+        default y
+        help
+            LVGL 9 moves group focus only for LV_KEY_NEXT or LV_KEY_PREV.
+            Arrow keys are delivered to the focused object as LV_EVENT_KEY,
+            which plain buttons ignore, so a 5-way keypad appears to have a
+            working OK key only. This option remaps UP/LEFT to PREV and
+            DOWN/RIGHT to NEXT so every screen can be navigated.
+            Disable it for screens whose widgets consume arrow keys directly,
+            such as sliders, spinboxes and scrollable lists.
+
+    config LVGL_PORT_TASK_CORE
+        int "LVGL handler task core (-1 for no affinity)"
+        range -1 1
+        default -1
+
+endmenu
